@@ -1,6 +1,7 @@
 from calendar import timegm
 from datetime import datetime
 
+from django.conf import settings
 from django.utils.translation import ugettext as _
 from rest_framework import exceptions, generics, status, viewsets
 from rest_framework.decorators import detail_route
@@ -9,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework_jwt.settings import api_settings
 
 from .models import RefreshToken
+from .authentication import RefreshTokenAuthentication
 from .serializers import DelegateJSONWebTokenSerializer, RefreshTokenSerializer
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
@@ -22,12 +24,18 @@ class DelegateJSONWebToken(generics.CreateAPIView):
     is valid.
     """
     permission_classes = [AllowAny]
+    authentication_classes = [RefreshTokenAuthentication]
     serializer_class = DelegateJSONWebTokenSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         user = serializer.validated_data['user']
+        if request.user != user:
+            raise exceptions.AuthenticationFailed(
+                _('Invalid auth credentials.'))
+
         if not user.is_active:
             raise exceptions.AuthenticationFailed(
                 _('User inactive or deleted.'))
@@ -36,9 +44,20 @@ class DelegateJSONWebToken(generics.CreateAPIView):
         if api_settings.JWT_ALLOW_REFRESH:
             payload['orig_iat'] = timegm(datetime.utcnow().utctimetuple())
         token = jwt_encode_handler(payload)
+
         response_data = jwt_response_payload_handler(token, user, request)
-        return Response(response_data,
-                        status=status.HTTP_200_OK)
+        response = Response(response_data, status=status.HTTP_200_OK)
+
+        if api_settings.JWT_AUTH_COOKIE:
+            domain = request.META['HTTP_HOST']  # Get current domain
+            expiration = (datetime.utcnow() + settings.JWT_COOKIE_EXPIRATION_DELTA)
+            response.set_signed_cookie(
+                api_settings.JWT_AUTH_COOKIE, token, expires=expiration,
+                max_age=expiration, secure=True, httponly=True,
+                domain=domain
+            )
+
+        return response
 
 
 class RefreshTokenViewSet(viewsets.ModelViewSet):

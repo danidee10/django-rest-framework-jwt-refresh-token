@@ -32,7 +32,7 @@ class RefreshTokenSerializer(serializers.ModelSerializer):
 
 
 class DelegateJSONWebTokenSerializer(serializers.Serializer):
-    client_id = serializers.CharField()
+    client_id = serializers.CharField(required=False)
     grant_type = serializers.CharField(
         default='urn:ietf:params:oauth:grant-type:jwt-bearer',
         required=False,

@@ -109,3 +109,9 @@ $ http POST client_id=app grant_type="urn:ietf:params:oauth:grant-type:jwt-beare
 ```json
 {"token": "your_jwt_token_...", "refresh_token": "your long running refresh token..."}
 ```
+
+Like `django-rest-framework-jwt`, It's also possible to pass the `REFRESH_TOKEN` as a cookie. It's recommended to use a Secure/httpOnly cookie so the cookie value can't be read from JavaScript.
+
+If you set `JWT_AUTH_COOKIE` `django-rest-framework-jwt-refresh-token` automatically does that for you.
+
+***Note that the cookies are checked before the request body.***

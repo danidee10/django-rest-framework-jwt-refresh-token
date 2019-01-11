@@ -11,6 +11,12 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 
 def jwt_decode_handler(token):
+    """
+    Disable token signature verification.
+
+    This allows us to verify expired tokens without getting a
+    jwt.InvalidToken exception.
+    """
     options = {
         'verify_exp': False
     }
@@ -33,17 +39,19 @@ class RefreshTokenAuthentication(JSONWebTokenAuthentication):
     """
     Extends JSONWebTokenAuthentication to:
 
-    Allow users to authenticate with expired JWT's
+    Allow users authenticate with expired JWT's
     """
 
     def get_jwt_value(self, request):
-        """Get signed cookie."""
+        """Get the JWT from the signed cookie or request header."""
         auth = get_authorization_header(request).split()
         auth_header_prefix = api_settings.JWT_AUTH_HEADER_PREFIX.lower()
 
         if not auth:
             if api_settings.JWT_AUTH_COOKIE:
-                return request.get_signed_cookie(api_settings.JWT_AUTH_COOKIE, default=None)
+                return request.get_signed_cookie(
+                    api_settings.JWT_AUTH_COOKIE, default=None
+                )
             return None
 
         if smart_text(auth[0].lower()) != auth_header_prefix:

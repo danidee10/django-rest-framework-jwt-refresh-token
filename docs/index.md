@@ -104,7 +104,7 @@ JWT_AUTH = {
 Then your user can ask a new JWT token as long as the refresh_token exists.
 
 ```bash
-$ http POST client_id=app grant_type="urn:ietf:params:oauth:grant-type:jwt-bearer" refresh_token=<REFRESH_TOKEN> api_type=app http://localhost:8000/delegate/
+$ http POST refresh_token=<REFRESH_TOKEN> api_type=app http://localhost:8000/delegate/
 ```
 ```json
 {"token": "your_jwt_token_...", "refresh_token": "your long running refresh token..."}

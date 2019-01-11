@@ -32,23 +32,16 @@ class RefreshTokenSerializer(serializers.ModelSerializer):
 
 
 class DelegateJSONWebTokenSerializer(serializers.Serializer):
-    client_id = serializers.CharField()
-    grant_type = serializers.CharField(
-        default='urn:ietf:params:oauth:grant-type:jwt-bearer',
-        required=False,
-    )
     refresh_token = serializers.CharField()
-    api_type = serializers.CharField(
-        default='app',
-        required=False,
-    )
 
     def validate(self, attrs):
+        """Check if a valid, non-expired token exists for the user."""
         refresh_token = attrs['refresh_token']
         try:
             token = RefreshToken.objects.select_related('user').get(
                 key=refresh_token)
         except RefreshToken.DoesNotExist:
-            raise exceptions.AuthenticationFailed(_('Invalid token.'))
+            raise exceptions.AuthenticationFailed(_('Invalid Refresh token.'))
         attrs['user'] = token.user
+
         return attrs

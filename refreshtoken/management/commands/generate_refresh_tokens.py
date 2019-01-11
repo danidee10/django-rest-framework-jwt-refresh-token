@@ -23,11 +23,9 @@ class Command(BaseCommand):
         for database_name in settings.DATABASES.keys():
             self.stdout.write('Using database {}...'.format(database_name))
 
-            # TODO: use filter() to only select users with missing keys.
-            for user in get_user_model().objects.using(database_name).all():
-                if user.refresh_tokens.exists():
-                    continue
-
+            for user in (
+                    get_user_model().objects.using(database_name)
+                    .filter(refresh_tokens__isnull=True)):
                 RefreshToken.objects.create(
                     user=user, app=jwt_refresh_settings.JWT_APP_NAME).save()
                 self.stdout.write('Created refresh token for {}'.format(user))

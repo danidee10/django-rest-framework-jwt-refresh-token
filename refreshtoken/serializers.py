@@ -41,7 +41,7 @@ class DelegateJSONWebTokenSerializer(serializers.Serializer):
             token = RefreshToken.objects.select_related('user').get(
                 key=refresh_token)
         except RefreshToken.DoesNotExist:
-            raise exceptions.AuthenticationFailed(_('Invalid Refresh token.'))
+            raise exceptions.AuthenticationFailed(_('Invalid refresh token.'))
         attrs['user'] = token.user
 
         return attrs

@@ -205,10 +205,9 @@ class RefreshTokenTestCase(APITestCase):
         self.assertIn('token', response.data)
 
     def test_invalid_body_delegate_jwt(self):
-        # client_id is missing
+        # refresh token is missing
         data = {
             'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-            'refresh_token': self.token1.key,
             'api_type': 'app',
         }
         response = self.client.post(self.delegate_url, data=data,

@@ -1,4 +1,4 @@
-# Generaete refresh tokens for users that don't have refresh tokens
+# Generate refresh tokens for users that don't have any.
 
 from django.conf import settings
 from django.contrib.auth import get_user_model

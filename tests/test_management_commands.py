@@ -7,7 +7,7 @@ from django.core.management import call_command
 def test_command_generate_refresh_tokens(alice, admin_user):
     " Test refresh token generation command."
 
-    # Users shouldn't have any refresh token
+    # Users shouldn't have any refresh token.
     refresh_tokens_queryset = get_user_model().objects.filter(
         refresh_tokens__isnull=True
     )

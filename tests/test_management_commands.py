@@ -15,5 +15,5 @@ def test_command_generate_refresh_tokens(alice, admin_user):
 
     call_command('generate_refresh_tokens', *[], **{})
 
-    # All users should have refresh tokens
+    # All users should have refresh tokens.
     assert refresh_tokens_queryset.count() == 0

@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 
 
-def test_mycommand(alice, admin_user):
+def test_command_generate_refresh_tokens(alice, admin_user):
     " Test refresh token generation command."
 
     # Users shouldn't have any refresh token

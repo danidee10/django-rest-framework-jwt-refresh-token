@@ -1,6 +1,5 @@
 # Generate refresh tokens for users that don't have any.
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
@@ -20,12 +19,9 @@ class Command(BaseCommand):
     help = 'Generate refresh tokens for all users without refresh tokens.'
 
     def handle(self, *args, **kwargs):
-        for database_name in settings.DATABASES.keys():
-            self.stdout.write('Using database {}...'.format(database_name))
-
-            for user in (
-                    get_user_model().objects.using(database_name)
-                    .filter(refresh_tokens__isnull=True)):
-                RefreshToken.objects.create(
-                    user=user, app=jwt_refresh_settings.JWT_APP_NAME).save()
-                self.stdout.write('Created refresh token for {}'.format(user))
+        for user in (
+                get_user_model().objects
+                .filter(refresh_tokens__isnull=True)):
+            RefreshToken.objects.create(
+                user=user, app=jwt_refresh_settings.JWT_APP_NAME).save()
+            self.stdout.write('Created refresh token for {}'.format(user))

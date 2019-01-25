@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from rest_framework import status
@@ -203,6 +205,24 @@ class RefreshTokenTestCase(APITestCase):
             (response.status_code, response.content)
         )
         self.assertIn('token', response.data)
+
+    def test_refresh_token_expiry():
+        """Expired tokens should return a 401."""
+        data = {
+            'client_id': 'gandolf',
+            'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            'refresh_token': self.token1.key,
+            'api_type': 'app',
+        }
+        # set token date to past date
+        self.token = datetime(2018, 1, 1)
+
+        response = self.client.post(self.delegate_url,
+                                    data=data,
+                                    format='json')
+        self.assertEqual(
+            response.status_code, status.HTTP_401_UNAUTHORIZED,
+        )
 
     def test_invalid_body_delegate_jwt(self):
         # client_id is missing

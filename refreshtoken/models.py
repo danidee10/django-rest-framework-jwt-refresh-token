@@ -1,9 +1,12 @@
-import binascii
 import os
+import binascii
+import datetime
 
 from django.conf import settings
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
+
+from refreshtoken.settings import api_settings as jwt_refresh_settings
 
 # Prior to Django 1.5, the AUTH_USER_MODEL setting does not exist.
 # Note that we don't perform this code in the compat module due to
@@ -30,6 +33,7 @@ class RefreshToken(models.Model):
     )
     app = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True)
+    expires = models.DateTimeField()
 
     class Meta:
         unique_together = ('user', 'app')
@@ -37,6 +41,8 @@ class RefreshToken(models.Model):
     def save(self, *args, **kwargs):
         if not self.key:
             self.key = self.generate_key()
+            self.expires = datetime.now() + \
+                jwt_refresh_settings.JWT_REFRESH_TOKEN_EXPIRATION_DELTA
         return super(RefreshToken, self).save(*args, **kwargs)
 
     def generate_key(self):

@@ -1,3 +1,5 @@
+
+from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import exceptions, serializers
 
@@ -50,5 +52,13 @@ class DelegateJSONWebTokenSerializer(serializers.Serializer):
                 key=refresh_token)
         except RefreshToken.DoesNotExist:
             raise exceptions.AuthenticationFailed(_('Invalid token.'))
+
+        # Verify expiry date of token
+        if token.expires < timezone.now():
+            raise exceptions.AuthenticationFailed(
+                _('Refreshtoken has expired.')
+            )
+
         attrs['user'] = token.user
+
         return attrs

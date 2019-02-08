@@ -206,7 +206,7 @@ class RefreshTokenTestCase(APITestCase):
         )
         self.assertIn('token', response.data)
 
-    def test_refresh_token_expiry():
+    def test_refresh_token_expiry(self):
         """Expired tokens should return a 401."""
         data = {
             'client_id': 'gandolf',
@@ -215,7 +215,8 @@ class RefreshTokenTestCase(APITestCase):
             'api_type': 'app',
         }
         # set token date to past date
-        self.token = datetime(2018, 1, 1)
+        self.token1.expires = datetime(2018, 1, 1)
+        self.token1.save()
 
         response = self.client.post(self.delegate_url,
                                     data=data,

@@ -1,7 +1,7 @@
 import os
 import binascii
-from datetime import datetime
 
+from django.utils import timezone
 from django.conf import settings
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
@@ -33,7 +33,10 @@ class RefreshToken(models.Model):
     )
     app = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True)
-    expires = models.DateTimeField()
+    expires = models.DateTimeField(
+        default=timezone.now() +
+        jwt_refresh_settings.JWT_REFRESH_TOKEN_EXPIRATION_DELTA
+    )
 
     class Meta:
         unique_together = ('user', 'app')
@@ -41,8 +44,6 @@ class RefreshToken(models.Model):
     def save(self, *args, **kwargs):
         if not self.key:
             self.key = self.generate_key()
-            self.expires = datetime.now() + \
-                jwt_refresh_settings.JWT_REFRESH_TOKEN_EXPIRATION_DELTA
         return super(RefreshToken, self).save(*args, **kwargs)
 
     def generate_key(self):
